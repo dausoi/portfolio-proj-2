@@ -20,11 +20,11 @@ def get_connection(connection_file, schema="public"):
                                 )
     return ps_con
 
-def download_file(year: int, month: int, day: int, hr: int):
+def download_raw_pageviews(year: int, month: int, day: int, hr: int):
     """ Download Raw File from Wikimedia Dump. Located at data/raw. """
     raw_filename = f"pageviews-{year}{month:02d}{day:02d}-{hr:02d}0000"
-    URL_PREFIX = f"https://dumps.wikimedia.org/other/pageviews/{year}/{year}-{month:02d}"
-    url_file = f"{URL_PREFIX}/{raw_filename}.gz"
+    url_prefix = f"https://dumps.wikimedia.org/other/pageviews/{year}/{year}-{month:02d}"
+    url_full = f"{url_prefix}/{raw_filename}.gz"
 
     raw_dir = Path("data/raw")
     raw_dir.mkdir(parents=True, exist_ok=True)
@@ -32,13 +32,13 @@ def download_file(year: int, month: int, day: int, hr: int):
     raw_filepath = os.path.join(raw_dir, raw_filename + ".gz")
 
     if not os.path.exists(raw_filepath):
-        print(f"Downloading file {url_file} ...")
+        print(f"Downloading file {url_full} ...")
 
-        with requests.get(url_file, stream=True) as r:
+        with requests.get(url_full, stream=True) as r:
             with open(raw_filepath, "wb") as f:
                 shutil.copyfileobj(r.raw, f)
     else:
-        print(f"Skipping file download {url_file} ...")
+        print(f"Skipping file download {url_full} ...")
 
     return raw_filepath
 
@@ -67,7 +67,7 @@ def get_dataframe(raw_filepath, nrows=None):
 
     return wiki_pgview
 
-def write_to_csv(df, csv_filename, replace=False):
+def write_to_csv(df, csv_filename):
     csv_filename = f"{csv_filename}.csv"
 
     csv_dir = Path("data/csv")
@@ -115,9 +115,10 @@ def copy_from_csv(csv_filepath, table_name, con):
 def download_raw_day(y, m, d):
     raw_paths = []
     for h in range(24):
-        rp = download_file(y, m, d, h)
+        rp = download_raw_pageviews(y, m, d, h)
         raw_paths.append(rp)
     return raw_paths
+
 
 def generate_csv(raw_path, csv_filename, table_name, con, replace=False):
     df = get_dataframe(raw_path)
@@ -137,7 +138,6 @@ def generate_csv_day(raw_paths: list[str], table_name, con, replace=False):
 def copy_from_csv_day(csv_paths, table_name, con):
     for csv_path in csv_paths:
         copy_from_csv(csv_path, table_name, con)
-
 
 def main(y, m, d, con_file, src_schema):
     table_name = f"pageview_raw_{y}{m:02d}{d:02d}"
