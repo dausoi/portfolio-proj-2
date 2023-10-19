@@ -3,23 +3,23 @@ create or replace function f_extract_domain(p_domain_code varchar(255))
 -- This function is based on PostgreSQL 14
 
 returns table
-		(lang				varchar,
-	 	proj				varchar,
-		wikimedia_proj		varchar,
-		visitmode			varchar)
+	(lang				varchar,
+	 proj				varchar,
+	wikimedia_proj			varchar,
+	visitmode			varchar)
 language plpgsql
 as $$
 declare
-	dm_code					varchar;
+	dm_code				varchar;
 	v_parsed_details		record;
 	v_clean_details			record;
 	WIKIMEDIA_PROJ			varchar := 'advisory|commons|meta|incubator|species|strategy|outreach|usability|quality|wikimania|wikitech';
-	ORI_WIKIMEDIA_PATTERN	varchar := '^('|| WIKIMEDIA_PROJ ||')';
+	ORI_WIKIMEDIA_PATTERN		varchar := '^('|| WIKIMEDIA_PROJ ||')';
 	LANG_PATTERN			varchar := '^[0-9a-z\-]+';
-	NON_WIKIMEDIA_PATTERN	varchar := '\.(b|d|f|n|q|s|v|voy|w|wd)$';
+	NON_WIKIMEDIA_PATTERN		varchar := '\.(b|d|f|n|q|s|v|voy|w|wd)$';
 	WIKIMEDIA_PATTERN		varchar := '^en\.('|| WIKIMEDIA_PROJ ||')\.(m)';
 	VISITMODE_PATTERN		varchar := '\.(m)\.(?:b|d|f|m|n|q|s|v|voy|w|wd)$';
-	VISITMODE_WP_PATTERN	varchar := '(?<=['|| WIKIMEDIA_PROJ ||']\.m)(\.m)$';
+	VISITMODE_WP_PATTERN		varchar := '(?<=['|| WIKIMEDIA_PROJ ||']\.m)(\.m)$';
 	
 begin
 	select into dm_code
