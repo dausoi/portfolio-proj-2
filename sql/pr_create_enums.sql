@@ -3,7 +3,6 @@ language plpgsql
 as $$
 declare
 begin
-	DROP FUNCTION IF EXISTS stg.f_extract_domain(character varying);
 	DROP TYPE IF EXISTS stg.visitmode;
 	DROP TYPE IF EXISTS stg.wmproj;
 	DROP TYPE IF EXISTS stg.proj;
