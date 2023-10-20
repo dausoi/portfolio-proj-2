@@ -1,12 +1,12 @@
-create or replace function f_extract_domain(p_domain_code varchar(255))
+create or replace function stg.f_extract_domain(p_domain_code varchar(255))
 -- This function takes a wikimedia pageview dumps' domain_code field and returns meaningful description.
 -- This function is based on PostgreSQL 14
 
 returns table
 	(lang				varchar,
-	 proj				varchar,
-	wikimedia_proj			varchar,
-	visitmode			varchar)
+	 proj				proj,
+	wikimedia_proj			wmproj,
+	visitmode			visitmode)
 language plpgsql
 as $$
 declare
@@ -55,8 +55,8 @@ begin
 			end as visitmode;
 	return query
 		select v_clean_details.lang::varchar as lang,
-				v_clean_details.proj::varchar as proj,
-				v_clean_details.wikimedia_proj::varchar as wikimedia_proj,
-				v_clean_details.visitmode::varchar as visitmode;
+				v_clean_details.proj::proj as proj,
+				v_clean_details.wikimedia_proj::wmproj as wikimedia_proj,
+				v_clean_details.visitmode::visitmode as visitmode;
 end;
 $$
