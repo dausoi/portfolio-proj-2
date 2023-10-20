@@ -19,7 +19,7 @@ declare
 	NON_WIKIMEDIA_PATTERN		varchar := '\.(b|d|f|n|q|s|v|voy|w|wd)$';
 	WIKIMEDIA_PATTERN		varchar := '^en\.('|| WIKIMEDIA_PROJ ||')\.(m)';
 	VISITMODE_PATTERN		varchar := '\.(m)\.(?:b|d|f|m|n|q|s|v|voy|w|wd)$';
-	VISITMODE_WP_PATTERN		varchar := '(?<=['|| WIKIMEDIA_PROJ ||']\.m)(\.m)$';
+	VISITMODE_WP_PATTERN		varchar := '^[0-9a-z\-]+\.(m)$';
 	
 begin
 	select into dm_code
