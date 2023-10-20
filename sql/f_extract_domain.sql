@@ -55,8 +55,8 @@ begin
 			end as visitmode;
 	return query
 		select v_clean_details.lang::varchar as lang,
-				v_clean_details.proj::proj as proj,
-				v_clean_details.wikimedia_proj::wmproj as wikimedia_proj,
-				v_clean_details.visitmode::visitmode as visitmode;
+				v_clean_details.proj::stg.proj as proj,
+				v_clean_details.wikimedia_proj::stg.wmproj as wikimedia_proj,
+				v_clean_details.visitmode::stg.visitmode as visitmode;
 end;
 $$
