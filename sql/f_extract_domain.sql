@@ -4,9 +4,9 @@ create or replace function stg.f_extract_domain(p_domain_code varchar(255))
 
 returns table
 	(lang				varchar,
-	 proj				proj,
-	wikimedia_proj			wmproj,
-	visitmode			visitmode)
+	 proj				stg.proj,
+	wikimedia_proj			stg.wmproj,
+	visitmode			stg.visitmode)
 language plpgsql
 as $$
 declare
