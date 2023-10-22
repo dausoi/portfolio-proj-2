@@ -89,14 +89,14 @@ def get_dataframe(raw_path: str, nrows: int = None):
 
     return wiki_pgview
 
-def write_df_to_csv(raw_path: str, csv_name: str, no_write: bool = False):
+def write_df_to_csv(raw_path: str, csv_name: str, only_path: bool = False):
     """
     Export Pandas Dataframe to csv files. Exports are created in "data/csv" directory.
 
     Parameters:
         - df: Pandas Dataframe to be written
         - csv_name: file name of the target csv
-        - no_write: [True] to only return combined Path without creating csv, 
+        - only_path: [True] to only return combined Path without creating csv, 
         [False] to both write dataframe to csv and return combined Path
     """
     csv_name = f"{csv_name}.csv"
@@ -106,7 +106,7 @@ def write_df_to_csv(raw_path: str, csv_name: str, no_write: bool = False):
 
     csv_filepath = os.path.join(csv_dir, csv_name)
 
-    if not no_write:
+    if not only_path:
         df = get_dataframe(raw_path)
         print(f"Writing to CSV {csv_filepath}...")
         df.to_csv(csv_filepath, index=False, chunksize=100000)
@@ -130,9 +130,9 @@ def copy_from_csv(csv_path: str, table_name: str, con):
             cur.copy_expert(f"COPY {table_name} {column_sql} FROM STDIN WITH (FORMAT CSV, DELIMITER ',')", f)
             con.commit()
 
-def get_csv_path(raw_path: str, csv_name: str, no_write: bool = False):
-    if no_write:
-        return write_df_to_csv(raw_path, csv_name, no_write)
+def get_csv_file(raw_path: str, csv_name: str, only_path: bool = False):
+    if only_path:
+        return write_df_to_csv(raw_path, csv_name, only_path)
     csv_fp = write_df_to_csv(raw_path, csv_name)
     return csv_fp
 
@@ -167,11 +167,11 @@ def download_raw_day(y: int, m: int , d: int, hrs: int = None):
     return raw_paths
 
 @task
-def get_csv_paths(raw_paths: list[str], no_write: bool = False):
+def get_csv_files(raw_paths: list[str], only_path: bool = False):
     csv_paths = []
     for raw_path in raw_paths:
         csv_filename = raw_path.split("/")[-1].split(".")[0]
-        cp = get_csv_path(raw_path, csv_filename, no_write)
+        cp = get_csv_file(raw_path, csv_filename, only_path)
         csv_paths.append(cp)
     return csv_paths
 
@@ -199,7 +199,7 @@ def main(year: int, month: int, day: int, connection_file: str, table_name: str,
     con = get_connection(connection_file)
     raw_paths = download_raw_day(year, month, day, hours)
     create_table(raw_paths[0], table_name, con)
-    csv_paths = get_csv_paths(raw_paths)
+    csv_paths = get_csv_files(raw_paths)
     copy_from_csv_day(csv_paths, table_name, con)
     con.close()
 
