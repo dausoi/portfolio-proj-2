@@ -31,8 +31,8 @@ def get_connection(connection_file: str):
 
 def download_raw_pageviews(year: int, month: int, day: int, hr: int) -> list[str]:
     """
-    Download gz dump file from wikimedia server. Stored in "data/raw" directory.
-    Returns a list of gz file path string.
+    Download gz dump file from wikimedia server. Stores in "data/raw" directory.
+    Returns a list of gz file path in str.
 
     Parameters:
         - year
@@ -80,6 +80,7 @@ def get_dataframe(raw_path: str, nrows: int = None):
     except pd.errors.ParserError:
         print("Error occured on C engine, switching to Python.")
         wiki_pgview = pd.read_csv(**params, engine="python")
+        # Python parser captures double quotes as literal string, opposed to C parser as NaN value
         wiki_pgview["domain_code"] = wiki_pgview["domain_code"].replace(to_replace='""', value=float('nan'))
     
     wiki_pgview["pgview_timestamp"] = str(datetime.datetime.strptime(filename, "pageviews-%Y%m%d-%H%M%S"))
@@ -92,7 +93,7 @@ def write_df_to_csv(raw_path: str, csv_name: str, no_write: bool = False):
     """
     Export Pandas Dataframe to csv files. Exports are created in "data/csv" directory.
 
-    Parameter:
+    Parameters:
         - df: Pandas Dataframe to be written
         - csv_name: file name of the target csv
         - no_write: [True] to only return combined Path without creating csv, 
@@ -114,9 +115,9 @@ def write_df_to_csv(raw_path: str, csv_name: str, no_write: bool = False):
 
 def copy_from_csv(csv_path: str, table_name: str, con):
     """
-    Import table in csv format to PostgreSQL server.
+    Import table in csv format to PostgreSQL database.
 
-    Parameter:
+    Parameters:
         - csv_path: CSV file path to be imported
         - table_name: Name of the table which data is being imported to
         - con: Connection object
@@ -142,11 +143,10 @@ def create_table(raw_path: str, table_name, con):
     """
     Create a blank new table in a PostgreSQL database.
 
-    Parameter:
+    Parameters:
         - raw_path: Raw file path to use and create a table
         - table_name: Name of the table to be created in the pgsql server
         - con: Connection object
-        - replace: In case of existing table, [True] to remove and create a new one. [False] to skip.
     """
     df = get_dataframe(raw_path, nrows=100)
     with con as c:
@@ -167,7 +167,7 @@ def download_raw_day(y: int, m: int , d: int, hrs: int = None):
     return raw_paths
 
 @task
-def get_csv_path_period(raw_paths: list[str], no_write: bool = False):
+def get_csv_paths(raw_paths: list[str], no_write: bool = False):
     csv_paths = []
     for raw_path in raw_paths:
         csv_filename = raw_path.split("/")[-1].split(".")[0]
@@ -180,7 +180,6 @@ def copy_from_csv_day(csv_paths: list[str], table_name: str, con):
     for csv_path in csv_paths:
         copy_from_csv(csv_path, table_name, con)
 
-# @flow(name="wiki-pageview-ingestion", log_prints=True)
 def main(year: int, month: int, day: int, connection_file: str, table_name: str, hours = None):
     """
     Download dump files from wikimedia source and convert them to csv, import them to PostgreSQL server.
@@ -200,10 +199,9 @@ def main(year: int, month: int, day: int, connection_file: str, table_name: str,
     con = get_connection(connection_file)
     raw_paths = download_raw_day(year, month, day, hours)
     create_table(raw_paths[0], table_name, con)
-    csv_paths = get_csv_path_period(raw_paths)
+    csv_paths = get_csv_paths(raw_paths)
     copy_from_csv_day(csv_paths, table_name, con)
     con.close()
 
 if __name__ == "__main__":
-    # Prefect deployment
     main()
