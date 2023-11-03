@@ -38,22 +38,22 @@ def transformation(src_table: str, agg_table: str, dest_table:str, con):
 
     cur = con.cursor()
     print("Creating enum types...")
-    cur.execute(Path("sql/pr_create_enums.sql").read_text())
+    cur.execute(Path("sql/01_pr_create_enums.sql").read_text())
     print("Creating functions....")
-    cur.execute(Path("sql/f_extract_domain.sql").read_text())
+    cur.execute(Path("sql/02_f_extract_domain.sql").read_text())
     print("Creating aggregated tables...")
-    cur.execute(Path("sql/create_agg_table.sql").read_text() \
+    cur.execute(Path("sql/03_create_agg_table.sql").read_text() \
                         .replace("[src_table]", src_table) \
                         .replace("[agg_table]", agg_table))
     print("Applying function with domain code....")
-    cur.execute(Path("sql/create_domain_table.sql").read_text() \
+    cur.execute(Path("sql/04_create_domain_table.sql").read_text() \
                         .replace("[src_domain_table]", src_domain_table))
     print("Creating output view...")
-    cur.execute(Path("sql/create_output_table.sql").read_text() \
+    cur.execute(Path("sql/05_create_output_table.sql").read_text() \
                         .replace("[agg_table]", agg_table) \
                         .replace("[dest_table]", dest_table))
     print("Cleaning up unused tables...")
-    cur.execute(Path("sql/clean_up.sql").read_text() \
+    cur.execute(Path("sql/06_clean_up.sql").read_text() \
                         .replace("[agg_table]", agg_table) \
                         .replace("[src_table]", src_table))
     con.commit()
