@@ -14,6 +14,7 @@
 - Database ที่ไว้รับข้อมูล: PostgreSQL
 - Data Transformation: pl/pgsql
 - Operating System: Ubuntu 20.04
+- Orchestrator: Prefect
 
 ## สถานะ
 - ✅ สร้าง Minimum Viable Product
