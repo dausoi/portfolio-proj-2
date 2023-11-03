@@ -38,7 +38,7 @@ def transformation(src_table: str, agg_table: str, dest_table:str, con):
 
     cur = con.cursor()
     print("Creating enum types...")
-    cur.execute(Path("sql/pr_create_types.sql").read_text())
+    cur.execute(Path("sql/pr_create_enums.sql").read_text())
     print("Creating functions....")
     cur.execute(Path("sql/f_extract_domain.sql").read_text())
     print("Creating aggregated tables...")
